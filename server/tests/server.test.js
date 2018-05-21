@@ -5,6 +5,7 @@ const {app} = require('./../server');
 const {Todo} = require('./../models/todo');
 
 const todos = [{
+    _id: '﻿5b0269f629fabd860ee29ffa',
     text: 'test todo'
 }, {
     text: 'test todo 2'
@@ -29,8 +30,7 @@ describe('POST /todos', () => {
            })
            .end((err, res) => {
                 if (err) {
-                    done(err);
-                    return;
+                    return done(err);
                 }
 
                 Todo.find().then((todos) => {
@@ -48,8 +48,7 @@ describe('POST /todos', () => {
            .expect(400)
            .end((err, res) => {
                if (err) {
-                   done(err);
-                   return;
+                   return done(err);
                }
 
                Todo.find().then((todos) => {
@@ -68,5 +67,30 @@ describe('GET /todos', () => {
             .expect((res) => {
                 expect(res.body.todos.length).toBe(2);
             }).end(done);
-    })
+    });
+});
+
+describe('GET /todos/:id', () => {
+    it('should find todo with valid id', (done) => {
+        request(app)
+            .get('/todos/5b0269f629fabd860ee29ffa')
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.todo.length).toBe(1);
+            }).end(done);
+    });
+
+    it ('should return 404 with invalid id', (done) => {
+        request(app)
+            .get('/todos/5b0269f629fabd860ee29ffaasdasd')
+            .expect(404)
+            .end(done);
+    });
+
+    it('should return 404 with unknown todo id', (done) => {
+        request(app)
+            .get('/todos/6b0269f629fabd860ee29ffa')
+            .expect(404)
+            .end(done);
+    });
 });
