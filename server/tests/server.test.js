@@ -3,9 +3,10 @@ const request = require('supertest');
 
 const {app} = require('./../server');
 const {Todo} = require('./../models/todo');
+const {ObjectID} = request('mongodb');
 
 const todos = [{
-    _id: '﻿5b0269f629fabd860ee29ffa',
+    _id: '5b0269f629fabd860ee29ffa',
     text: 'test todo'
 }, {
     text: 'test todo 2'
@@ -73,10 +74,11 @@ describe('GET /todos', () => {
 describe('GET /todos/:id', () => {
     it('should find todo with valid id', (done) => {
         request(app)
-            .get('/todos/5b0269f629fabd860ee29ffa')
+            .get(`/todos/${todos[0]._id}`)
             .expect(200)
             .expect((res) => {
-                expect(res.body.todo.length).toBe(1);
+                expect(res.body.todo.text).toBe(todos[0].text);
+                expect(res.body.todo._id).toBe(todos[0]._id);
             }).end(done);
     });
 
