@@ -7,10 +7,12 @@ const {Todo} = require('./../models/todo');
 
 const todos = [{
     _id: new ObjectID(),
-    text: 'test todo'
+    text: 'test todo',
+    completed: false
 }, {
     _id: new ObjectID(),
-    text: 'test todo 2'
+    text: 'test todo 21344',
+    completed: true
 }];
 
 beforeEach((done) => {
@@ -136,6 +138,56 @@ describe('DELETE /todos/:id', () => {
         let unknownId = new ObjectID();
         request(app)
             .delete(`/todos/${unknownId}`)
+            .expect(404)
+            .end(done);
+    });
+});
+
+describe('PATCH /todos/:id', () => {
+
+    it('should update the todo', (done) => {
+        request(app)
+            .patch(`/todos/${todos[0]._id}`)
+            .send({
+                text: 'updated text',
+                completed: true
+            })
+            .expect(200)
+            .expect((res) => {
+                let todo = res.body.todo;
+                expect(todo.text).toBe('updated text');
+                expect(todo.completed).toBe(true);
+                expect(typeof todo.completedAt).toBe('number');
+            })
+            .end(done);
+    });
+
+    it('should clear completedAt when completed is updated to false', (done) => {
+        request(app)
+            .patch(`/todos/${todos[1]._id}`)
+            .send({
+                completed: false
+            })
+            .expect(200)
+            .expect((res) => {
+                let todo = res.body.todo;
+                expect(todo.completed).toBe(false);
+                expect(todo.completedAt).toBeNull();
+            })
+            .end(done);
+    });
+
+    it('should return 404 with invalid id', (done) => {
+        request(app)
+            .patch('/todos/123')
+            .expect(404)
+            .end(done);
+    });
+
+    it('should return 404 with unknown todo id', (done) => {
+        let unknownId = new ObjectID();
+        request(app)
+            .patch(`/todos/${unknownId}`)
             .expect(404)
             .end(done);
     });
