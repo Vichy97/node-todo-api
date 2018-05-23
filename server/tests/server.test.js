@@ -1,9 +1,9 @@
 const expect = require('expect');
 const request = require('supertest');
+const {ObjectID} = require('mongodb');
 
 const {app} = require('./../server');
 const {Todo} = require('./../models/todo');
-const {ObjectID} = require('mongodb');
 
 const todos = [{
     _id: new ObjectID(),
@@ -20,8 +20,8 @@ beforeEach((done) => {
 });
 
 describe('POST /todos', () => {
-    it('should create new todos', (done) => {
-        let text = 'test todo';
+    it('should create new todo', (done) => {
+        let text = 'test todo 3';
 
         request(app)
             .post('/todos')
@@ -38,7 +38,7 @@ describe('POST /todos', () => {
                 Todo.find()
                     .then((todos) => {
                         expect(todos.length).toBe(3);
-                        expect(todos[0].text).toBe(text);
+                        expect(todos[2].text).toBe(text);
                         done();
                     })
                     .catch((err) => done(err));
