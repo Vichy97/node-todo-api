@@ -5,9 +5,10 @@ const bodyParser = require('body-parser');
 const {ObjectID} = require('mongodb');
 const _ = require('lodash');
 
-const {mongoose} = require('./db/mongoose');
-const {Todo} = require('./models/todo');
-const {User} = require('./models/user');
+let {mongoose} = require('./db/mongoose');
+let {Todo} = require('./models/todo');
+let {User} = require('./models/user');
+let {authenticate} = require('./middleware/authenticate');
 
 const app = express();
 const port = process.env.PORT;
@@ -81,8 +82,7 @@ app.patch('/todos/:id', (req, res) => {
         body.completedAt = null;
     }
 
-    Todo.findByIdAndUpdate(id, {$set: body }, {new: true})
-        .then((todo) => {
+    Todo.findByIdAndUpdate(id, {$set: body }, {new: true}).then((todo) => {
             if (!todo) {
                 return res.status(404).send();
             }
@@ -105,6 +105,10 @@ app.post('/users', (req, res) => {
         res.status(400).send(err);
     });
 
+});
+
+app.get('/users/me', authenticate, (req, res) => {
+    res.send(req.user)
 });
 
 app.listen(port, () => {
