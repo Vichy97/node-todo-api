@@ -8,7 +8,7 @@ let UserSchema = new mongoose.Schema({
     email: {
         type: String,
         required: true,
-        minLength: 1,
+        minlength: 1,
         trim: true,
         unique: true,
         validate: {
@@ -19,7 +19,7 @@ let UserSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true,
-        minLength: 8,
+        minlength: 8,
     },
     tokens: [{
         access: {
