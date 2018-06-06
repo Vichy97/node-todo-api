@@ -57,6 +57,7 @@ describe('POST /todos', () => {
 });
 
 describe('GET /todos', () => {
+
     it('should get all todos', (done) => {
         request(app)
             .get('/todos')
@@ -68,6 +69,7 @@ describe('GET /todos', () => {
 });
 
 describe('GET /todos/:id', () => {
+
     it('should find todo with valid id', (done) => {
         request(app)
             .get(`/todos/${todos[0]._id}`)
@@ -95,6 +97,7 @@ describe('GET /todos/:id', () => {
 });
 
 describe('DELETE /todos/:id', () => {
+
     it('should delete todo with valid id', (done) => {
         request(app)
             .delete(`/todos/${todos[0]._id}`)
@@ -231,7 +234,9 @@ describe('POST /users', () => {
                     expect(user).toBeDefined();
                     expect(user.password).not.toBe(password);
                     done();
-                })
+                }).catch((err) => {
+                    done(err);
+                });
             });
     });
 
@@ -274,4 +279,69 @@ describe('POST /users', () => {
             .expect(400)
             .end(done);
     });
+});
+
+describe('POST /users/login', () => {
+
+   it('should login user and return auth token', (done) => {
+        request(app)
+            .post('/users/login')
+            .send({
+                email: users[1].email,
+                password: users[1].password
+            })
+            .expect(200)
+            .expect((res) => {
+                expect(res.headers['x-auth']).toBeDefined();
+            })
+            .end((err, res) => {
+                if (err) {
+                    return done(err);
+                }
+
+                User.findById(users[1]._id).then((user) => {
+                   expect(user.tokens[0]).toHaveProperty('access', 'auth');
+                   expect(user.tokens[0]).toHaveProperty('token', res.headers['x-auth']);
+                   done();
+                }).catch((err) => {
+                    done(err);
+                });
+            })
+   });
+
+    it ('should return validation error with no request body', (done) => {
+        request(app)
+            .post('/users/login')
+            .expect(400)
+            .end(done);
+    });
+
+   it('should return validation error with invalid email', (done) => {
+       request(app)
+           .post('/users/login')
+           .send({
+               email: 'somefakeemail@test.com',
+               password: 'password123'
+           })
+           .expect((res) => {
+               expect(res.headers['x-auth']).not.toBeDefined();
+           })
+           .expect(400)
+           .end(done);
+   });
+
+    it('should return validation error with invalid password', (done) => {
+        request(app)
+            .post('/users/login')
+            .send({
+                email: users[0].email,
+                password: 'incorrectPassword'
+            })
+            .expect((res) => {
+                expect(res.headers['x-auth']).not.toBeDefined();
+            })
+            .expect(400)
+            .end(done);
+    });
+
 });
